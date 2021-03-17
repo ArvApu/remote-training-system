@@ -1,0 +1,6 @@
+[submodule "api"]
+	path = api
+	url = git@github.com:ArvApu/fitness-api.git
+[submodule "web"]
+	path = web
+	url = https://github.com/ArvApu/fitness-web.git
