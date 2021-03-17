@@ -1,0 +1,71 @@
+version: "3.7"
+services:
+
+  # API server service
+  api:
+    build: 
+      args:
+        user: api-user
+        uid: 1000
+      context: .
+      dockerfile: ./docker/api/Dockerfile
+    image: api
+    container_name: api-server
+    restart: unless-stopped
+    working_dir: /var/www/api
+    depends_on: 
+      - database
+      - nginx
+    volumes:
+      - ./api:/var/www/api
+    networks:
+      - app-network
+
+  # Database service
+  database:
+    image: mysql:5.7
+    container_name: database
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD_ROOT}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    networks:
+      - app-network
+
+  # Nginx webserver service
+  nginx:
+    image: nginx:1.17-alpine
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 81:81
+    expose:
+      - "81"
+    volumes:
+      - ./api:/var/www/api
+      - ./docker/nginx/back-end:/etc/nginx/conf.d
+    networks:
+      - app-network
+      
+  # Web app service
+  web:
+    build:
+      context: .
+      dockerfile: ./docker/web/Dockerfile
+    volumes:
+      - './web:/usr/src/app'
+      - '/usr/src/app/node_modules'
+    ports:
+      - '80:80'
+      - '443:443'
+    networks:
+      - app-network
+      
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
