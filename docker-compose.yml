@@ -67,7 +67,7 @@ services:
     networks:
       - app-network
     
-    # Redis service
+  # Redis service
   redis:
     image: redis:4.0
     container_name: app-redis
